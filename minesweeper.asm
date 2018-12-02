@@ -392,7 +392,7 @@ ADD_FIELD_NUMBERS proc
     add di, configurationBoardWidth
     add di, configurationBoardWidth         ; moves down(on left)
     ;TEST IF IS NOT OUT OF RANGE HERE
-    jmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
+    cmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
     jz ADD_FIELD_NUMBERS_NEXT3              ; if is a bomb go to next position
     inc byte ptr[bx+di]                     ; add 1 if isn't a bomb 
     
@@ -472,7 +472,7 @@ call WRITE_UINT16             ;
 mov di, si
 inc di                        ;
 mov byte ptr[bx+di], 0BH    ; if not, moves the bomb to the position
-call ADD_FIELD_NUMBERS
+;call ADD_FIELD_NUMBERS
 
 jmp MOV_TO_BOARD_END
 
@@ -627,7 +627,7 @@ mov click, ax                ; stores the final result on 'click' (this position
 mov bx, offset board
 mov di, click
 
-cmp byte ptr[bx+di], 1      ; cmp the status field with 0 (if 0, then the field's closed, if 1, then the field's flagged and if 2,
+cmp byte ptr[bx+di], 1      ; cmp the status field with 1 (if 0, then the field's closed, if 1, then the field's flagged and if 2,
 ; the field's already open)
 
 js MOUSE_ACTION_LEFT_TREATMENT    ; if zero, the field is closed, needed to check if is a bomb
@@ -643,13 +643,9 @@ jmp MOUSE_ACTION_LEFT_END
 
 MOUSE_ACTION_LEFT_TREATMENT:     ; == 0
 inc di
-cmp byte ptr [bx+di], 0
-jz MOUSE_ACTION_LEFT_NEXT
 cmp byte ptr [bx+di], 0BH
 jz BRIDGE_MOUSE_ACTION_LEFT_1
-jmp MOUSE_ACTION_LEFT_END
 
-MOUSE_ACTION_LEFT_NEXT:
 SET_CURSOR x, y
 xor ax, ax
 mov al, [bx+di]
@@ -675,7 +671,7 @@ push cx
 push dx
 
 mov ax, y
-mov dx, configurationBoardHeigth
+mov dx, configurationBoardHeigth       ; test if the click is on the board
 
 cmp dx, ax
 js MOUSE_ACTION_RIGHT_END
@@ -694,22 +690,33 @@ js MOUSE_ACTION_RIGHT_END
 mul cx                        ; mul the row by the lenght of the board
 add ax, bx                    ; add the result from the mul above with the column number
 
-mov cx, 2                    ;
+mov cx, 2                     ;
 mul cx                        ; mul the result above by 2, 'cause it's a word vector
 
-mov click, ax                ; stores the final result on 'click' (this position access the status part of the field)
+mov click, ax                 ; stores the final result on 'click' (this position access the status part of the field)
 
 mov bx, offset board
 mov di, click
 
-cmp byte ptr[bx+di], 0
+cmp byte ptr[bx+di], 0        ; cmp the status field with 0 (if 0, then the field's closed, if 1, then the field's flagged and if 2,
+                              ; the field's already open)
 
-js MOUSE_ACTION_RIGHT_END
-jz MOUSE_ACTION_RIGHT_END
+jz MOUSE_ACTION_RIGHT_TREATMENT   ; if zero, the field is closed, needed to check if is a bomb
 
-SET_CURSOR x, y
+jmp MOUSE_ACTION_RIGHT_END
 
-MOUSE_ACTION_RIGHT_END:
+MOUSE_ACTION_RIGHT_TREATMENT:   ; == 0
+
+mov byte ptr [bx+di], 1               ; if it was marked, now it's with 0, what means that he's a closed field, without flag
+jmp MOUSE_ACTION_LEFT_END
+
+
+MOUSE_ACTION_RIGHT_END:           ; == 2
+
+pop dx
+pop cx
+pop bx
+pop ax
 ret
 endp
 
