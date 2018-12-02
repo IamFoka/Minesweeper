@@ -369,82 +369,83 @@ ret
 endp
 
 ADD_FIELD_NUMBERS proc
-push di
-push ax
-push cx
-push dx
-
-mov dx, x
-mov cx, y
-
-add di, 2
-inc dx
-cmp configurationBoardWidth, dx
-js ADD_FIELD_NUMBERS_END
-inc byte ptr[bx+di]
-
-sub di, 4
-sub dx, 2
-cmp configurationBoardWidth, dx
-js ADD_FIELD_NUMBERS_END
-inc byte ptr[bx+di]
-
-
-
-add di, configurationBoardWidth
-inc cx
-cmp configurationBoardHeigth, cx
-js ADD_FIELD_NUMBERS_END
-inc byte ptr[bx+di]
-
-
-
-add di, 2
-inc dx
-cmp configurationBoardWidth, dx
-js ADD_FIELD_NUMBERS_END
-inc byte ptr[bx+di]
-
-
-
-add di, 2
-add dx, 1
-cmp configurationBoardWidth, dx
-js ADD_FIELD_NUMBERS_END
-inc byte ptr[bx+di]
-
-
-
-sub di, configurationBoardWidth
-sub di, configurationBoardWidth
-sub cx, 2
-cmp configurationBoardHeigth, cx
-js ADD_FIELD_NUMBERS_END
-inc byte ptr[bx+di]
-
-
-
-sub di, 2
-dec dx
-cmp configurationBoardWidth, dx
-js ADD_FIELD_NUMBERS_END
-inc byte ptr[bx+di]
-
-
-
-sub di, 2
-dec dx
-cmp configurationBoardWidth, dx
-js ADD_FIELD_NUMBERS_END
-inc byte ptr[bx+di]
-
-ADD_FIELD_NUMBERS_END:
-
-pop dx
-pop cx
-pop ax
-pop di
-ret
+    push di
+    push ax
+    push cx
+    push dx
+    
+    add di, 2                               ; moves right
+    ;TEST IF IS NOT OUT OF RANGE HERE
+    cmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
+    jz ADD_FIELD_NUMBERS_NEXT1              ; if is a bomb go to next position
+    inc byte ptr[bx+di]                     ; add 1 if isn't a bomb
+    
+    ADD_FIELD_NUMBERS_NEXT1:
+    sub di, 4                               ; moves left
+    ;TEST IF IS NOT OUT OF RANGE HERE
+    cmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
+    jz ADD_FIELD_NUMBERS_NEXT2              ; if is a bomb go to next position
+    inc byte ptr[bx+di]                     ; add 1 if isn't a bomb
+    
+    
+    ADD_FIELD_NUMBERS_NEXT2:
+    add di, configurationBoardWidth
+    add di, configurationBoardWidth         ; moves down(on left)
+    ;TEST IF IS NOT OUT OF RANGE HERE
+    jmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
+    jz ADD_FIELD_NUMBERS_NEXT3              ; if is a bomb go to next position
+    inc byte ptr[bx+di]                     ; add 1 if isn't a bomb 
+    
+    
+    ADD_FIELD_NUMBERS_NEXT3:         
+    add di, 2                               ; moves right       
+    ;TEST IF IS NOT OUT OF RANGE HERE
+    cmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
+    jz ADD_FIELD_NUMBERS_NEXT4              ; if is a bomb go to next position
+    inc byte ptr[bx+di]                     ; add 1 if isn't a bomb
+    
+    
+    ADD_FIELD_NUMBERS_NEXT4:
+    add di, 2                               ; moves right
+    ;TEST IF IS NOT OUT OF RANGE HERE    
+    cmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
+    jz ADD_FIELD_NUMBERS_NEXT5              ; if is a bomb go to next position
+    inc byte ptr[bx+di]                     ; add 1 if isn't a bomb
+    
+    
+    ADD_FIELD_NUMBERS_NEXT5:
+    sub di, configurationBoardWidth
+    sub di, configurationBoardWidth
+    sub di, configurationBoardWidth
+    sub di, configurationBoardWidth         ; moves up (on right)
+    ;TEST IF IS NOT OUT OF RANGE HERE
+    cmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
+    jz ADD_FIELD_NUMBERS_NEXT6              ; if is a bomb go to next position
+    inc byte ptr[bx+di]                     ; add 1 if isn't a bomb
+    
+    
+    ADD_FIELD_NUMBERS_NEXT6:                
+    sub di, 2                               ; moves left
+    ;TEST IF IS NOT OUT OF RANGE HERE
+    cmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
+    jz ADD_FIELD_NUMBERS_NEXT7              ; if is a bomb go to next position
+    inc byte ptr[bx+di]                     ; add 1 if isn't a bomb
+    
+    
+    ADD_FIELD_NUMBERS_NEXT7:
+    sub di, 2                               ; moves left
+    ;TEST IF IS NOT OUT OF RANGE HERE
+    cmp byte ptr[bx+di], 0BH                ; tests if isn't a bomb
+    jz ADD_FIELD_NUMBERS_END                ; if is a bomb go to next position
+    inc byte ptr[bx+di]                     ; add 1 if isn't a bomb
+    
+    ADD_FIELD_NUMBERS_END:
+    
+    pop dx
+    pop cx
+    pop ax
+    pop di
+    ret
 endp
 
 
@@ -819,26 +820,3 @@ jmp GAME
 END_GAME:
 
 end start
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
